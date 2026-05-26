@@ -53,6 +53,15 @@ function PencilIcon() {
   );
 }
 
+function FlipBtnIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M3 12a9 9 0 0 1 15.5-6.3M21 5v4h-4" />
+      <path d="M21 12a9 9 0 0 1-15.5 6.3M3 19v-4h4" />
+    </svg>
+  );
+}
+
 export default function FlipCard({ card, className = "", style, onDelete, onSave }: Props) {
   const [flipped, setFlipped] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -154,34 +163,49 @@ export default function FlipCard({ card, className = "", style, onDelete, onSave
               </div>
             </div>
 
-            {/* Top-right action icons (view mode only) */}
-            {!editing && (
-              <div className="absolute top-2 right-2 z-10 flex items-center gap-0.5">
-                {onSave && (
-                  <button
-                    type="button"
-                    aria-label="编辑这张卡片"
-                    onClick={enterEdit}
-                    className="w-7 h-7 rounded-full flex items-center justify-center text-ink/40 hover:text-ink hover:bg-ink/5 active:bg-ink/10 transition-colors"
-                  >
-                    <PencilIcon />
-                  </button>
-                )}
-                {onDelete && (
-                  <button
-                    type="button"
-                    aria-label="删除这张卡片"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDelete(card.id);
-                    }}
-                    className="w-7 h-7 rounded-full flex items-center justify-center text-ink/40 hover:text-ink hover:bg-ink/5 active:bg-ink/10 transition-colors"
-                  >
-                    <TrashIcon />
-                  </button>
-                )}
-              </div>
-            )}
+            {/* Top-right action icons */}
+            <div className="absolute top-2 right-2 z-10 flex items-center gap-0.5">
+              {editing ? (
+                <button
+                  type="button"
+                  aria-label="翻到背面编辑原文"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setFlipped(true);
+                  }}
+                  className="h-7 px-2.5 rounded-full flex items-center gap-1 text-[11px] text-ink/70 hover:text-ink hover:bg-ink/5 active:bg-ink/10 transition-colors border border-ink/20"
+                >
+                  <FlipBtnIcon />
+                  编辑原文
+                </button>
+              ) : (
+                <>
+                  {onSave && (
+                    <button
+                      type="button"
+                      aria-label="编辑这张卡片"
+                      onClick={enterEdit}
+                      className="w-7 h-7 rounded-full flex items-center justify-center text-ink/40 hover:text-ink hover:bg-ink/5 active:bg-ink/10 transition-colors"
+                    >
+                      <PencilIcon />
+                    </button>
+                  )}
+                  {onDelete && (
+                    <button
+                      type="button"
+                      aria-label="删除这张卡片"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete(card.id);
+                      }}
+                      className="w-7 h-7 rounded-full flex items-center justify-center text-ink/40 hover:text-ink hover:bg-ink/5 active:bg-ink/10 transition-colors"
+                    >
+                      <TrashIcon />
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
           </div>
 
           {/* Back — raw text */}
@@ -190,11 +214,27 @@ export default function FlipCard({ card, className = "", style, onDelete, onSave
             style={{ transform: "rotateY(180deg)" }}
             onClick={(e) => editing && e.stopPropagation()}
           >
+            {/* Top-right flip-to-front in edit mode */}
+            {editing && (
+              <button
+                type="button"
+                aria-label="翻回正面编辑精华"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFlipped(false);
+                }}
+                className="absolute top-2 right-2 z-10 h-7 px-2.5 rounded-full flex items-center gap-1 text-[11px] text-paper/80 hover:text-paper hover:bg-paper/10 active:bg-paper/20 transition-colors border border-paper/30"
+              >
+                <FlipBtnIcon />
+                编辑精华
+              </button>
+            )}
+
             {editing ? (
               <textarea
                 value={draftRawText}
                 onChange={(e) => setDraftRawText(e.target.value)}
-                className="font-hand text-[18px] leading-[26px] flex-1 min-h-[140px] bg-transparent text-paper placeholder:text-paper/40 outline-none border-none resize-none w-full"
+                className="font-hand text-[18px] leading-[26px] flex-1 min-h-[140px] bg-transparent text-paper placeholder:text-paper/40 outline-none border-none resize-none w-full mt-8"
                 placeholder="原文..."
               />
             ) : (
