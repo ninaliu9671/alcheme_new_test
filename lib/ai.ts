@@ -1,54 +1,24 @@
 /* =========================================================
-   🔑 REPLACE AI PROVIDER HERE
-   1. Set AI_CONFIG.url   — your API endpoint
-   2. Set AI_CONFIG.key   — your API key (use env in prod!)
-   3. Set AI_CONFIG.model — model id
-   Currently using mockExtract — see lib/mock.ts.
-   Edit the prompt in lib/prompt.ts.
+   Browser-side wrapper. Calls our own /api/extract route.
+   No keys here — the real API key lives only on the server.
+   See app/api/extract/route.ts to configure the AI provider.
    ========================================================= */
 
-import { EXTRACT_PROMPT } from "./prompt";
 import { mockExtract } from "./mock";
 
-export const AI_CONFIG = {
-  url: "", // e.g. "https://api.openai.com/v1/chat/completions"
-  key: "", // e.g. process.env.NEXT_PUBLIC_AI_KEY
-  model: "", // e.g. "gpt-4o-mini"
-};
-
 export async function extractEssence(rawText: string): Promise<string[]> {
-  // Fall back to local mock when no provider is configured.
-  if (!AI_CONFIG.url) {
-    return mockExtract(rawText);
-  }
-
-  const prompt = EXTRACT_PROMPT.replace("{{INPUT}}", rawText);
-
   try {
-    const res = await fetch(AI_CONFIG.url, {
+    const res = await fetch("/api/extract", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${AI_CONFIG.key}`,
-      },
-      body: JSON.stringify({
-        model: AI_CONFIG.model,
-        messages: [{ role: "user", content: prompt }],
-      }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rawText }),
     });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    const text: string =
-      data?.choices?.[0]?.message?.content ??
-      data?.content ??
-      "";
-    const match = text.match(/\[[\s\S]*\]/);
-    if (match) {
-      const arr = JSON.parse(match[0]);
-      if (Array.isArray(arr)) return arr.filter((s) => typeof s === "string");
-    }
-    return mockExtract(rawText);
+    if (Array.isArray(data.sentences)) return data.sentences;
+    throw new Error("bad response shape");
   } catch (err) {
-    console.warn("[ai] extractEssence failed, falling back to mock:", err);
+    console.warn("[ai] extractEssence client error, using local mock:", err);
     return mockExtract(rawText);
   }
 }
