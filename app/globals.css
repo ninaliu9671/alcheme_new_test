@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body {
+  height: 100%;
+}
+
+body {
+  background-color: #A9C8D1;
+  color: #0F0F0F;
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer utilities {
+  /* Paper with horizontal ruled lines */
+  .paper-lines {
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 31px,
+      #C9B998 31px,
+      #C9B998 32px
+    );
+  }
+
+  /* Dashed inner border helper */
+  .dashed-inset {
+    position: absolute;
+    inset: 8px;
+    border: 1px dashed #0F0F0F;
+    border-radius: 1.25rem;
+    pointer-events: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  .preserve-3d { transform-style: preserve-3d; }
+  .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+}
+
+textarea.paper-textarea {
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  width: 100%;
+  line-height: 32px;
+  padding-top: 7px;
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+textarea.paper-textarea:focus {
+  outline: none;
+  box-shadow: none;
+}
