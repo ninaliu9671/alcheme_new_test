@@ -1,116 +1,79 @@
 # Alcheme ✨
 
-> 一个温柔的日记炼金术士 — 把你的随笔提炼成"我"开头的精华句子，存进魔法盒慢慢回看。
+> 你是人生的炼金师，这里照见你的魔法。
 
-手绘 + 像素混搭风格的移动端日记 web app。用户写下今日感受，AI 提炼成几句"我..."开头的闪光碎片，每张卡片可翻面查看原始日记。
+🌐 **[alcheme-new-test.vercel.app](https://alcheme-new-test.vercel.app/)**
 
-## 截图
+---
 
-| 炼制（输入） | 提炼结果 | 魔法盒（历史卡片） |
-|---|---|---|
-| 女巫骑扫帚 + 纸条输入框 | 女巫煮锅 + ✨ 精华句列表 | 宝箱 + 可翻面卡片堆 |
+## 这是什么
 
-设计参考见 `UI_v1.png`。
+一个安静的角落。
 
-## 技术栈
+你写下今天发生的事——好的、不好的、说不清的——AI 像一个读完了你所有日记的老朋友，把你**做到了但没看见的事**轻轻念给你听。
 
-- **Next.js 14** App Router + **TypeScript**
-- **Tailwind CSS** + 自定义纸张/虚线工具类
-- **Framer Motion** — 女巫漂浮、锅蒸汽、列表 stagger、飞入魔法盒、3D 翻卡、Tab 切换
-- **Zustand** + localStorage 持久化
-- **@fontsource** 本地字体（Press Start 2P / Caveat / Noto Sans SC）— 无 Google Fonts 依赖
-- AI 调用走 **服务端 Route Handler**（`/api/extract`），密钥不进浏览器
+不是鼓励，不是分析，不是「你真的很棒」这种话。
 
-## 本地运行
+是把你已经说出来、却被自己用「但是」掩盖掉的事实，单独放在你面前。
 
-```bash
-npm install
-npm run dev
-# 访问 http://localhost:3000
-```
+## 它是怎么工作的
 
-不配置 AI 时自动走 `lib/mock.ts` 的假数据，前端流程依然可用。
+**1. 写**
 
-## 配置真实 AI
+打开 Alcheme，看见骑扫帚的小女巫。下面一张米色的纸，写下今天。
 
-1. 复制环境变量示例：
-   ```bash
-   cp .env.local.example .env.local
-   ```
-2. 编辑 `.env.local`：
-   ```env
-   AI_URL=https://api.deepseek.com/chat/completions
-   AI_KEY=sk-xxxxxxxxxxxx
-   AI_MODEL=deepseek-chat
-   ```
-   其它兼容 OpenAI chat-completions 协议的提供商同理（OpenAI / Moonshot / 智谱 / 通义千问 ...）。
-3. **重启** `npm run dev`（env 改了必须重启）
+> 今天我做到了…我允许自己了…  
+> 记录今日闪光碎片，夸夸我真棒！  
+> 或者，只是来说说过得怎么样…  
+> 好与不好，我们一起稳稳地接住自己。
 
-⚠️ **绝不要**给变量加 `NEXT_PUBLIC_` 前缀 — 那会暴露到浏览器。
+**2. 提炼**
 
-### 调试
+女巫开始煮锅。几秒后，纸上浮现几句以「我」开头的话。
 
-直接打 API：
-```bash
-curl -s -X POST http://localhost:3000/api/extract \
-  -H "Content-Type: application/json" \
-  -d '{"rawText":"今天早上喝了咖啡"}'
-```
+句子的长短、数量、落点，由你写下的内容决定。内容简短，提炼 2-3 个；内容丰富，可能 7-8 个。
 
-返回里的 `source` 字段：
-- `ai` — 真实 AI 成功 ✅
-- `mock` — 没读到 env（重启 dev）
-- `mock-error` — AI 报错（看 dev server 控制台详细日志）
-- `mock-fallback` — AI 返回了但没找到合法 JSON 数组（调 prompt）
+每一句都不是从你说的话里翻译过来的——是从你**没有主动命名**的角落里挑出来的。
 
-## 自定义提炼提示词
+**3. 收藏**
 
-编辑 [`lib/prompt.ts`](lib/prompt.ts) 的 `EXTRACT_PROMPT` 常量。**必须保留 `{{INPUT}}` 占位符** — 服务端会把它替换成用户的真实日记。
+把卡片存进魔法盒。
 
-## 部署到 Vercel
+正面是那几句精华，背面是你原本的日记。点一下翻过去，你会看见自己当时是怎么说的。
 
-1. 把仓库 import 到 https://vercel.com/new
-2. Framework Preset 自动识别为 Next.js
-3. **Environment Variables** 面板里添加：
-   - `AI_URL`
-   - `AI_KEY`
-   - `AI_MODEL`
+随时翻回来，看看那些被你忽略过的事实。
 
-   （同样**不加** `NEXT_PUBLIC_` 前缀）
-4. Deploy
+## 它不做什么
 
-## 项目结构
+- 不追问你「为什么会这样想」
+- 不给建议
+- 不做心理分析
+- 不说「你需要先放下 X 才能做到 Y」
+- 不夸你
+- 不和你聊天
 
-```
-app/
-  page.tsx                  # 炼制（输入页）
-  result/page.tsx           # 提炼结果
-  box/page.tsx              # 魔法盒（卡片列表）
-  api/extract/route.ts      # 服务端 AI 调用 ← 在这里替换 AI 提供商
-  layout.tsx
-  globals.css
+它是一个见证者，不是一个聊天伙伴。
 
-components/
-  PhoneFrame.tsx            # 手机视口外框 + 雪花莲装饰
-  TopBar.tsx                # 顶栏（tab/sub 两种变体）
-  BottomTabs.tsx            # 底部 Tab：炼制 / 魔法盒
-  PaperCard.tsx             # 米色纸卡 + 横线 + 虚线内框
-  PillButton.tsx            # 黑色胶囊 + 金星按钮
-  StarBullet.tsx            # 金色五角星 SVG
-  FlipCard.tsx              # 双面翻卡（正：精华 / 背：原文）
-  PageTransitionProvider.tsx
+## 设计
 
-lib/
-  ai.ts                     # 浏览器侧 wrapper（只调本地 /api/extract）
-  prompt.ts                 # AI 提示词 ← 在这里改提炼风格
-  mock.ts                   # 假数据
-  store.ts                  # zustand + localStorage
-  types.ts
+手绘水彩 + 像素混搭。
 
-public/assets/              # 6 张透明 PNG 素材
-scripts/slice-assets.mjs    # 从原图切素材的脚本（已用过）
-```
+雪花莲、骑扫帚的小女巫、星月宝箱、煮着白雾的黑锅、金色的星星项目符号、米色的纸张和虚线边框——这是一个魔法的、温柔的、不打扰你的空间。
 
-## License
+字体上像素体作标题（Press Start 2P），手写体写背面的原文（Caveat），正文是中文（Noto Sans SC）。
 
-MIT
+颜色：雾青、纸米、墨黑、金。
+
+## 隐私
+
+你的日记**只发到自己的服务器上**调用 AI，**不留任何痕迹在前端代码里**。卡片本地存储在浏览器，不上传任何后端数据库。你删浏览器缓存，它们就消失了——像没发生过一样。
+
+## 致谢
+
+- 灵感来自所有那些「我以为我又搞砸了，但其实……」的瞬间
+- 风格参考各种手账、女巫塔罗、像素游戏
+- 用 Next.js / Tailwind / Framer Motion / DeepSeek 搭起来
+
+---
+
+*Alcheme · 把今天的你，留给以后的你。*
