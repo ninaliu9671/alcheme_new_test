@@ -45,3 +45,6 @@ next-env.d.ts
 
 # preview / temp
 /.claude/
+
+# ui
+/ui
