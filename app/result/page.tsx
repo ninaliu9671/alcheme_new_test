@@ -2,13 +2,13 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import PhoneFrame from "@/components/PhoneFrame";
 import TopBar from "@/components/TopBar";
 import PaperCard from "@/components/PaperCard";
 import PillButton from "@/components/PillButton";
-import StarBullet from "@/components/StarBullet";
+import EssenceEditor from "@/components/EssenceEditor";
 import { useStore } from "@/lib/store";
 import type { Card } from "@/lib/types";
 
@@ -19,6 +19,12 @@ export default function ResultPage() {
   const addEntry = useStore((s) => s.addEntry);
   const reset = useStore((s) => s.reset);
   const [flying, setFlying] = useState(false);
+  const [editedSentences, setEditedSentences] = useState<string[]>(sentences);
+
+  // Sync if extraction finishes after this page mounts (e.g., navigation race).
+  useEffect(() => {
+    setEditedSentences(sentences);
+  }, [sentences]);
 
   function handleSave() {
     if (flying) return;
@@ -26,12 +32,13 @@ export default function ResultPage() {
   }
 
   function onFlyComplete() {
+    const cleaned = editedSentences.map((s) => s.trim()).filter((s) => s.length > 0);
     const card: Card = {
       id:
         typeof crypto !== "undefined" && "randomUUID" in crypto
           ? crypto.randomUUID()
           : `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-      sentences,
+      sentences: cleaned,
       rawText: draft,
       createdAt: Date.now(),
     };
@@ -44,6 +51,8 @@ export default function ResultPage() {
     reset();
     router.push("/");
   }
+
+  const canSave = editedSentences.some((s) => s.trim().length > 0) && !flying;
 
   return (
     <motion.div
@@ -69,7 +78,6 @@ export default function ResultPage() {
               className="w-48 h-auto"
               priority
             />
-            {/* Steam puffs over cauldron */}
             <div className="pointer-events-none absolute inset-0">
               {[0, 0.7, 1.4].map((delay, i) => (
                 <motion.span
@@ -108,34 +116,25 @@ export default function ResultPage() {
           }}
         >
           <PaperCard className="mt-2">
-            <h2 className="text-center font-bold text-[16px] mb-3">
+            <h2 className="text-center font-bold text-[16px] mb-1">
               ✨ 你的魔法精华
             </h2>
-            <ul className="space-y-3 leading-[28px]">
-              {sentences.length === 0 ? (
-                <li className="text-ink/50 text-sm">还没有提炼内容。</li>
-              ) : (
-                sentences.map((s, i) => (
-                  <motion.li
-                    key={i}
-                    className="flex items-start gap-2 text-[15px]"
-                    initial={{ opacity: 0, x: -8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.15, duration: 0.35 }}
-                  >
-                    <span className="pt-1 flex-shrink-0">
-                      <StarBullet size={16} />
-                    </span>
-                    <span>{s}</span>
-                  </motion.li>
-                ))
-              )}
-            </ul>
+            <p className="text-center text-[11px] text-ink/50 mb-3">
+              可以直接修改，再存入魔法盒
+            </p>
+            {editedSentences.length === 0 ? (
+              <p className="text-ink/50 text-sm py-4 text-center">还没有提炼内容。</p>
+            ) : (
+              <EssenceEditor
+                value={editedSentences}
+                onChange={setEditedSentences}
+              />
+            )}
           </PaperCard>
         </motion.div>
 
         <div className="flex justify-center gap-3 mt-3">
-          <PillButton onClick={handleSave} showStars={false} className="px-5" disabled={flying}>
+          <PillButton onClick={handleSave} showStars={false} className="px-5" disabled={!canSave}>
             <span className="mr-1">📦</span>
             <span>存入魔法盒</span>
           </PillButton>

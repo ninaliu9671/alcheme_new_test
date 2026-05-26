@@ -13,6 +13,7 @@ import { useStore } from "@/lib/store";
 export default function BoxPage() {
   const entries = useStore((s) => s.entries);
   const removeEntry = useStore((s) => s.removeEntry);
+  const updateEntry = useStore((s) => s.updateEntry);
   const [mounted, setMounted] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
   useEffect(() => setMounted(true), []);
@@ -78,7 +79,11 @@ export default function BoxPage() {
                   }}
                   transition={{ delay: i * 0.04, duration: 0.35 }}
                 >
-                  <FlipCard card={c} onDelete={(id) => setPendingDelete(id)} />
+                  <FlipCard
+                    card={c}
+                    onDelete={(id) => setPendingDelete(id)}
+                    onSave={(id, patch) => updateEntry(id, patch)}
+                  />
                 </motion.div>
               ))}
             </AnimatePresence>

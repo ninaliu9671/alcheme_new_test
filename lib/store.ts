@@ -10,6 +10,7 @@ type State = {
   currentExtract: string[];
   addEntry: (card: Card) => void;
   removeEntry: (id: string) => void;
+  updateEntry: (id: string, patch: Partial<Pick<Card, "sentences" | "rawText">>) => void;
   setDraft: (text: string) => void;
   setExtract: (sentences: string[]) => void;
   reset: () => void;
@@ -25,6 +26,10 @@ export const useStore = create<State>()(
         set((s) => ({ entries: [card, ...s.entries] })),
       removeEntry: (id) =>
         set((s) => ({ entries: s.entries.filter((c) => c.id !== id) })),
+      updateEntry: (id, patch) =>
+        set((s) => ({
+          entries: s.entries.map((c) => (c.id === id ? { ...c, ...patch } : c)),
+        })),
       setDraft: (text) => set({ currentDraft: text }),
       setExtract: (sentences) => set({ currentExtract: sentences }),
       reset: () => set({ currentDraft: "", currentExtract: [] }),
