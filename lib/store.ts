@@ -9,6 +9,7 @@ type State = {
   currentDraft: string;
   currentExtract: string[];
   addEntry: (card: Card) => void;
+  removeEntry: (id: string) => void;
   setDraft: (text: string) => void;
   setExtract: (sentences: string[]) => void;
   reset: () => void;
@@ -22,6 +23,8 @@ export const useStore = create<State>()(
       currentExtract: [],
       addEntry: (card) =>
         set((s) => ({ entries: [card, ...s.entries] })),
+      removeEntry: (id) =>
+        set((s) => ({ entries: s.entries.filter((c) => c.id !== id) })),
       setDraft: (text) => set({ currentDraft: text }),
       setExtract: (sentences) => set({ currentExtract: sentences }),
       reset: () => set({ currentDraft: "", currentExtract: [] }),

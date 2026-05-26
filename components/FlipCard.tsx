@@ -9,6 +9,7 @@ type Props = {
   card: Card;
   className?: string;
   style?: React.CSSProperties;
+  onDelete?: (id: string) => void;
 };
 
 function formatTime(ts: number) {
@@ -21,7 +22,7 @@ function formatTime(ts: number) {
   return `${yyyy}.${mm}.${dd} ${hh}:${mi}`;
 }
 
-function FlipIcon({ className = "" }: { className?: string }) {
+function FlipIcon() {
   return (
     <svg
       width="12"
@@ -32,7 +33,6 @@ function FlipIcon({ className = "" }: { className?: string }) {
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={className}
       aria-hidden
     >
       <path d="M3 12a9 9 0 0 1 15.5-6.3M21 5v4h-4" />
@@ -41,21 +41,49 @@ function FlipIcon({ className = "" }: { className?: string }) {
   );
 }
 
-export default function FlipCard({ card, className = "", style }: Props) {
+function TrashIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="M4 7h16" />
+      <path d="M9 7V4h6v3" />
+      <path d="M6 7l1 13h10l1-13" />
+      <path d="M10 11v6M14 11v6" />
+    </svg>
+  );
+}
+
+export default function FlipCard({ card, className = "", style, onDelete }: Props) {
   const [flipped, setFlipped] = useState(false);
 
   return (
     <motion.div
       className={`relative w-full ${className}`}
       style={{ perspective: "1200px", ...style }}
-      whileHover={{ y: -2 }}
-      whileTap={{ scale: 0.99 }}
     >
-      <button
-        type="button"
-        onClick={() => setFlipped((f) => !f)}
-        className="block w-full text-left"
+      <motion.div
+        role="button"
+        tabIndex={0}
         aria-label={flipped ? "翻回精华" : "翻面看原文"}
+        onClick={() => setFlipped((f) => !f)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setFlipped((f) => !f);
+          }
+        }}
+        className="block w-full text-left cursor-pointer outline-none"
+        whileHover={{ y: -2 }}
+        whileTap={{ scale: 0.99 }}
       >
         <motion.div
           className="relative w-full preserve-3d"
@@ -68,11 +96,11 @@ export default function FlipCard({ card, className = "", style }: Props) {
             scale: { duration: 0.6, times: [0, 0.5, 1] },
           }}
         >
-          {/* Front — essence (natural height defines card size) */}
+          {/* Front — essence */}
           <div className="relative backface-hidden bg-paper paper-lines rounded-2xl border-[1.5px] border-ink p-4">
             <div className="dashed-inset" aria-hidden />
             <div className="relative">
-              <ul className="space-y-2">
+              <ul className="space-y-2 pr-7">
                 {card.sentences.map((s, i) => (
                   <li key={i} className="flex items-start gap-2 leading-[24px] text-[14px]">
                     <span className="pt-1 flex-shrink-0">
@@ -83,16 +111,33 @@ export default function FlipCard({ card, className = "", style }: Props) {
                 ))}
               </ul>
               <div className="mt-3 flex items-end justify-between gap-3">
-                <span className="text-[11px] text-ink/60 flex-shrink-0">{formatTime(card.createdAt)}</span>
+                <span className="text-[11px] text-ink/60 flex-shrink-0">
+                  {formatTime(card.createdAt)}
+                </span>
                 <span className="inline-flex items-center gap-1 text-[10px] text-ink/55 flex-shrink-0">
                   <FlipIcon />
                   翻面看原文
                 </span>
               </div>
             </div>
+
+            {/* Delete button — top-right */}
+            {onDelete && (
+              <button
+                type="button"
+                aria-label="删除这张卡片"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(card.id);
+                }}
+                className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full flex items-center justify-center text-ink/40 hover:text-ink hover:bg-ink/5 active:bg-ink/10 transition-colors"
+              >
+                <TrashIcon />
+              </button>
+            )}
           </div>
 
-          {/* Back — raw text (overlays front, same size; long text scrolls inside) */}
+          {/* Back — raw text */}
           <div
             className="absolute inset-0 backface-hidden bg-card-back text-paper rounded-2xl border-[1.5px] border-ink p-4 flex flex-col"
             style={{ transform: "rotateY(180deg)" }}
@@ -111,7 +156,7 @@ export default function FlipCard({ card, className = "", style }: Props) {
             </div>
           </div>
         </motion.div>
-      </button>
+      </motion.div>
     </motion.div>
   );
 }
