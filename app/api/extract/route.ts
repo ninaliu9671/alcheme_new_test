@@ -46,7 +46,16 @@ export async function POST(req: Request) {
         messages: [{ role: "user", content: prompt }],
       }),
     });
-    const data = await res.json();
+    // Read as text first so we can log the body even when it isn't JSON.
+    const bodyText = await res.text();
+    console.log(`[/api/extract] AI status=${res.status} contentType=${res.headers.get("content-type")} bodyPreview=${bodyText.slice(0, 300)}`);
+    if (!res.ok) throw new Error(`AI HTTP ${res.status}: ${bodyText.slice(0, 200)}`);
+    let data: any;
+    try {
+      data = JSON.parse(bodyText);
+    } catch {
+      throw new Error(`AI returned non-JSON body: ${bodyText.slice(0, 200)}`);
+    }
     const text: string =
       data?.choices?.[0]?.message?.content ?? data?.content ?? "";
 
