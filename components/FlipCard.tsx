@@ -67,10 +67,9 @@ export default function FlipCard({ card, className = "", style }: Props) {
             rotateY: { type: "spring", stiffness: 120, damping: 14, duration: 0.6 },
             scale: { duration: 0.6, times: [0, 0.5, 1] },
           }}
-          style={{ minHeight: 220 }}
         >
-          {/* Front — essence */}
-          <div className="absolute inset-0 backface-hidden bg-paper paper-lines rounded-2xl border-[1.5px] border-ink p-4">
+          {/* Front — essence (natural height defines card size) */}
+          <div className="relative backface-hidden bg-paper paper-lines rounded-2xl border-[1.5px] border-ink p-4">
             <div className="dashed-inset" aria-hidden />
             <div className="relative">
               <ul className="space-y-2">
@@ -79,13 +78,13 @@ export default function FlipCard({ card, className = "", style }: Props) {
                     <span className="pt-1 flex-shrink-0">
                       <StarBullet size={14} />
                     </span>
-                    <span>{s}</span>
+                    <span className="break-words">{s}</span>
                   </li>
                 ))}
               </ul>
-              <div className="mt-3 flex items-end justify-between">
-                <span className="text-[11px] text-ink/60">{formatTime(card.createdAt)}</span>
-                <span className="inline-flex items-center gap-1 text-[10px] text-ink/55">
+              <div className="mt-3 flex items-end justify-between gap-3">
+                <span className="text-[11px] text-ink/60 flex-shrink-0">{formatTime(card.createdAt)}</span>
+                <span className="inline-flex items-center gap-1 text-[10px] text-ink/55 flex-shrink-0">
                   <FlipIcon />
                   翻面看原文
                 </span>
@@ -93,19 +92,19 @@ export default function FlipCard({ card, className = "", style }: Props) {
             </div>
           </div>
 
-          {/* Back — raw text */}
+          {/* Back — raw text (overlays front, same size; long text scrolls inside) */}
           <div
-            className="absolute inset-0 backface-hidden bg-card-back text-paper rounded-2xl border-[1.5px] border-ink p-4"
+            className="absolute inset-0 backface-hidden bg-card-back text-paper rounded-2xl border-[1.5px] border-ink p-4 flex flex-col"
             style={{ transform: "rotateY(180deg)" }}
           >
-            <div className="font-hand text-[18px] leading-[26px] whitespace-pre-wrap pr-1 max-h-[160px] overflow-auto">
+            <div className="font-hand text-[18px] leading-[26px] whitespace-pre-wrap pr-1 flex-1 min-h-0 overflow-y-auto overscroll-contain">
               {card.rawText || "(空)"}
             </div>
-            <div className="mt-3 flex items-end justify-between">
-              <span className="text-[11px] text-paper/60 font-sans">
+            <div className="mt-3 flex items-end justify-between gap-3 flex-shrink-0">
+              <span className="text-[11px] text-paper/60 font-sans flex-shrink-0">
                 {formatTime(card.createdAt)}
               </span>
-              <span className="inline-flex items-center gap-1 text-[10px] text-paper/60 font-sans">
+              <span className="inline-flex items-center gap-1 text-[10px] text-paper/60 font-sans flex-shrink-0">
                 <FlipIcon />
                 翻回精华
               </span>
