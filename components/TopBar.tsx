@@ -1,12 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import StarBullet from "./StarBullet";
+import SettingsDrawer from "./SettingsDrawer";
 
 type Variant = "tab" | "sub";
 
 type Props = {
   onBack?: () => void;
+  /** Override the default settings drawer with a custom handler. */
   onSettings?: () => void;
   /** "tab" = top-level tabbed page (no back btn). "sub" = sub-page (back btn, no settings). */
   variant?: Variant;
@@ -14,9 +17,14 @@ type Props = {
 
 export default function TopBar({ onBack, onSettings, variant = "tab" }: Props) {
   const router = useRouter();
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const handleBack = () => {
     if (onBack) onBack();
     else router.back();
+  };
+  const handleSettings = () => {
+    if (onSettings) onSettings();
+    else setSettingsOpen(true);
   };
 
   return (
@@ -50,7 +58,7 @@ export default function TopBar({ onBack, onSettings, variant = "tab" }: Props) {
         <button
           type="button"
           aria-label="settings"
-          onClick={onSettings}
+          onClick={handleSettings}
           className="w-8 h-8 flex items-center justify-center text-ink"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -60,6 +68,10 @@ export default function TopBar({ onBack, onSettings, variant = "tab" }: Props) {
         </button>
       ) : (
         <span className="w-8 h-8" aria-hidden />
+      )}
+
+      {variant === "tab" && !onSettings && (
+        <SettingsDrawer open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       )}
     </div>
   );
